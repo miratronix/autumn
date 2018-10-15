@@ -66,8 +66,8 @@ first := &FirstLeaf{}
 second := &SecondLeaf{}
 
 tree := autumn.NewTree()
-tree.AddLeaf(FirstLeaf)
-tree.AddLeaf(SecondLeaf)
+tree.AddLeaf(first)
+tree.AddLeaf(second)
 
 // You can now resolve the dependencies. Once this operation completes, first.SecondLeaf will point to second. and 
 // second.FirstLeaf will point to first. Because of the order in which these were added, "First constructed" will be 
