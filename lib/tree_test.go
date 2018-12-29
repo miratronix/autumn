@@ -30,10 +30,15 @@ func (p *parent) PostConstruct() {
 
 type child struct {
 	pcValue int
+	pdValue int
 }
 
 func (c *child) PostConstruct() {
 	c.pcValue = 1
+}
+
+func (c *child) PreDestroy() {
+	c.pdValue = 1
 }
 
 func (c *child) GetLeafName() string {
@@ -54,6 +59,14 @@ type circularBar struct {
 
 func (c *circularBar) GetLeafName() string {
 	return "circularBar"
+}
+
+func TestChop(t *testing.T) {
+	Convey("Calls PreDestroy in each leaf", t, func() {
+		leaf := &child{}
+		NewTree().AddLeaf(leaf).Chop()
+		So(leaf.pdValue, ShouldEqual, 1)
+	})
 }
 
 func TestAddLeaf(t *testing.T) {
