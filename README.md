@@ -22,8 +22,8 @@ Before jumping into usage, let's define some terms:
 
 * `Leaf` - A leaf is a singleton structure pointer. You can think of it as a Spring `Bean`. It has 2 properties:
     * a name, used to wire it into other leaves. This can be set with `GetLeafName`, or by assigning a name when adding the leaf to a tree.
-    * a optional `PostConstruct` function, which is called when dependencies have been resolved.
-    * a optional `PreDestroy` function, which is called when the tree is "chopped" (stopped).
+    * an optional `PostConstruct` function, which is called when dependencies have been resolved.
+    * an optional `PreDestroy` function, which is called when the tree is "chopped" (stopped).
 * `Tree` - A tree contains a list of leaves, and does the heavy lifting when resolving dependencies.
 
 So, let's say you define a leaf like so:
