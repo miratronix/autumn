@@ -88,7 +88,7 @@ tree.Resolve()
 // useful when you want to add multiple copies of the same leaf with different names
 tree.AddNamedLeaf("AnotherFirst", first)
 
-// To kill all the leaves in the tree, call Chop(). This is useful when gracefully shutting down an applications, and
+// To kill all the leaves in the tree, call Chop(). This is useful when gracefully shutting down an application, and
 // gives each leaf a chance to clean up after itself.
 tree.Chop()
 ```
