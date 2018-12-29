@@ -2,15 +2,17 @@ package lib
 
 // Tree defines a set of leaves
 type Tree struct {
-	unresolved map[string][]string
-	leaves     []*Leaf
+	unresolved  map[string][]string
+	leaves      []*Leaf
+	stopChannel chan struct{}
 }
 
 // NewTree constructs a new tree
 func NewTree() *Tree {
 	return &Tree{
-		unresolved: map[string][]string{},
-		leaves:     []*Leaf{},
+		unresolved:  map[string][]string{},
+		leaves:      []*Leaf{},
+		stopChannel: nil,
 	}
 }
 
@@ -52,6 +54,13 @@ func (t *Tree) GetLeaf(name string) *Leaf {
 		}
 	}
 	return nil
+}
+
+// Chop chops down the tree, calling pre-destroy on all the leaves that have it
+func (t *Tree) Chop() {
+	for _, leaf := range t.leaves {
+		leaf.callPreDestroy()
+	}
 }
 
 // CheckType checks the type of the supplied interface

@@ -8,6 +8,7 @@ const (
 	tagName             = "autumn"
 	getNameMethod       = "GetLeafName"
 	postConstructMethod = "PostConstruct"
+	preDestroyMethod    = "PreDestroy"
 )
 
 // Leaf describes a single injected class
@@ -16,8 +17,11 @@ type Leaf struct {
 	structureValue   reflect.Value
 	structureElement reflect.Value
 
-	name                   string
-	value                  interface{}
+	name          string
+	value         interface{}
+	postConstruct reflect.Value
+	preDestroy    reflect.Value
+
 	unresolvedDependencies map[string]reflect.Value
 	resolvedDependencies   map[string]reflect.Value
 }
@@ -32,6 +36,8 @@ func NewLeaf(structPtr interface{}) *Leaf {
 
 	leaf.initializeName()
 	leaf.initializeDependencies()
+	leaf.initializePostConstruct()
+	leaf.initializePreDestroy()
 	return leaf
 }
 
@@ -45,6 +51,8 @@ func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
 	}
 
 	leaf.initializeDependencies()
+	leaf.initializePostConstruct()
+	leaf.initializePreDestroy()
 	return leaf
 }
 
@@ -82,6 +90,34 @@ func (l *Leaf) initializeDependencies() {
 	}
 }
 
+// initializePostConstruct initializes the post construct function for the leaf, panicking if it's invalid
+func (l *Leaf) initializePostConstruct() {
+	l.postConstruct = l.structureValue.MethodByName(postConstructMethod)
+	if !l.postConstruct.IsValid() {
+		return
+	}
+
+	if l.postConstruct.Type().NumIn() != 0 {
+		panic(l.structureType.String() + " - " + postConstructMethod + " must not take any parameters")
+	} else if l.postConstruct.Type().NumOut() != 0 {
+		panic(l.structureType.String() + " - " + postConstructMethod + " must not return any parameters")
+	}
+}
+
+// initializePreDestroy initializes the pre destroy function for the leaf, panicking if it's invalid
+func (l *Leaf) initializePreDestroy() {
+	l.preDestroy = l.structureValue.MethodByName(preDestroyMethod)
+	if !l.preDestroy.IsValid() {
+		return
+	}
+
+	if l.preDestroy.Type().NumIn() != 0 {
+		panic(l.structureType.String() + " - " + preDestroyMethod + " must not take any parameters")
+	} else if l.preDestroy.Type().NumOut() != 0 {
+		panic(l.structureType.String() + " - " + preDestroyMethod + " must not return any parameters")
+	}
+}
+
 // resolveDependencies resolves dependencies for the leaf using the supplied tree
 func (l *Leaf) resolveDependencies(tree *Tree) {
 	for name := range l.unresolvedDependencies {
@@ -114,18 +150,18 @@ func (l *Leaf) dependenciesResolved() bool {
 	return len(l.unresolvedDependencies) == 0
 }
 
-// callPostConstruct calls the leafs PostConstruct method if it has one
+// callPostConstruct calls the leaf's PostConstruct method if it has one
 func (l *Leaf) callPostConstruct() {
-	method := l.structureValue.MethodByName(postConstructMethod)
-	if !method.IsValid() {
+	if !l.postConstruct.IsValid() {
 		return
 	}
+	l.postConstruct.Call([]reflect.Value{})
+}
 
-	if method.Type().NumIn() != 0 {
-		panic(l.structureType.String() + " - " + postConstructMethod + " must not take any parameters")
-	} else if method.Type().NumOut() != 0 {
-		panic(l.structureType.String() + " - " + postConstructMethod + " must not return any parameters")
+// callPreDestroy calls the leaf's PreDestroy method if it has one
+func (l *Leaf) callPreDestroy() {
+	if !l.preDestroy.IsValid() {
+		return
 	}
-
-	method.Call([]reflect.Value{})
+	l.preDestroy.Call([]reflect.Value{})
 }

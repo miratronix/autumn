@@ -7,6 +7,7 @@ Autumn is a basic, spring-inspired dependency injection framework for Go. It's a
 * Circular dependency resolution
 * Self-injection of leaves
 * `PostConstruct` functionality
+* `PreDestroy` functionality
 
 Naturally, there's lots to do:
 
@@ -21,7 +22,8 @@ Before jumping into usage, let's define some terms:
 
 * `Leaf` - A leaf is a singleton structure pointer. You can think of it as a Spring `Bean`. It has 2 properties:
     * a name, used to wire it into other leaves. This can be set with `GetLeafName`, or by assigning a name when adding the leaf to a tree.
-    * a `PostConstruct` function, which is called when dependencies have been resolved.
+    * an optional `PostConstruct` function, which is called when dependencies have been resolved.
+    * an optional `PreDestroy` function, which is called when the tree is "chopped" (stopped).
 * `Tree` - A tree contains a list of leaves, and does the heavy lifting when resolving dependencies.
 
 So, let's say you define a leaf like so:
@@ -39,6 +41,10 @@ func (f *FirstLeaf) GetLeafName() string {
 func (f *FirstLeaf) PostConstruct() {
 	fmt.Println("First constructed, f.SecondLeaf is not nil here")
 }
+
+func (f *FirstLeaf) PreDestroy() {
+	fmt.Println("First destroyed")
+}
 ```
 
 And a second one:
@@ -55,6 +61,10 @@ func (s *SecondLeaf) GetLeafName() string {
 
 func (s *SecondLeaf) PostConstruct() {
 	fmt.Println("Second constructed, s.FirstLeaf is not nil here")
+}
+
+func (s *SecondLeaf) PreDestroy() {
+	fmt.Println("Second destroyed")
 }
 ```
 
@@ -77,4 +87,8 @@ tree.Resolve()
 // You can also set the leaf name while adding it, which overrides the leaf name defined in the structure. This is
 // useful when you want to add multiple copies of the same leaf with different names
 tree.AddNamedLeaf("AnotherFirst", first)
+
+// To kill all the leaves in the tree, call Chop(). This is useful when gracefully shutting down an application, and
+// gives each leaf a chance to clean up after itself.
+tree.Chop()
 ```
