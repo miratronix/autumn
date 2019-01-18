@@ -3,15 +3,15 @@ package lib
 // Tree defines a set of leaves
 type Tree struct {
 	unresolved  map[string][]string
-	leaves      []*Leaf
+	leaves      map[uintptr]*Leaf
 	stopChannel chan struct{}
 }
 
 // NewTree constructs a new tree
 func NewTree() *Tree {
 	return &Tree{
-		unresolved:  map[string][]string{},
-		leaves:      []*Leaf{},
+		unresolved:  make(map[string][]string),
+		leaves:      make(map[uintptr]*Leaf),
 		stopChannel: nil,
 	}
 }
@@ -49,7 +49,7 @@ func (t *Tree) Resolve() {
 // GetLeaf gets a leaf in the tree by name
 func (t *Tree) GetLeaf(name string) *Leaf {
 	for _, leaf := range t.leaves {
-		if leaf.name == name {
+		if leaf.HasAlias(name) {
 			return leaf
 		}
 	}
@@ -95,7 +95,15 @@ func (t *Tree) checkUnresolved() {
 
 // add adds a leaf to the tree
 func (t *Tree) add(leaf *Leaf) *Tree {
+	ptr := leaf.structurePointer
+
+	if _, ok := t.leaves[ptr]; ok {
+		t.leaves[ptr].AddAlias(leaf.name)
+		return t
+	}
+
 	t.checkName(leaf.name)
-	t.leaves = append(t.leaves, leaf)
+	t.leaves[ptr] = leaf
+
 	return t
 }
