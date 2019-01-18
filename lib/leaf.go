@@ -16,8 +16,10 @@ type Leaf struct {
 	structureType    reflect.Type
 	structureValue   reflect.Value
 	structureElement reflect.Value
+	structurePointer uintptr
 
 	name          string
+	aliases       map[string]struct{}
 	value         interface{}
 	postConstruct reflect.Value
 	preDestroy    reflect.Value
@@ -32,12 +34,17 @@ func NewLeaf(structPtr interface{}) *Leaf {
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
+		structurePointer: getStructurePointer(structPtr),
+		aliases:          make(map[string]struct{}),
 	}
 
 	leaf.initializeName()
 	leaf.initializeDependencies()
 	leaf.initializePostConstruct()
 	leaf.initializePreDestroy()
+
+	leaf.AddAlias(leaf.name)
+
 	return leaf
 }
 
@@ -47,13 +54,29 @@ func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
+		structurePointer: getStructurePointer(structPtr),
 		name:             name,
+		aliases:          make(map[string]struct{}),
 	}
 
 	leaf.initializeDependencies()
 	leaf.initializePostConstruct()
 	leaf.initializePreDestroy()
+
+	leaf.AddAlias(leaf.name)
+
 	return leaf
+}
+
+// AddAlias adds passed name to aliases
+func (l *Leaf) AddAlias(name string) {
+	l.aliases[name] = struct{}{}
+}
+
+// HasAlias checks if leaf has passed name as alias
+func (l *Leaf) HasAlias(name string) bool {
+	_, ok := l.aliases[name]
+	return ok
 }
 
 // initializeName initializes the name for the leaf
