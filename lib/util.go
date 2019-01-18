@@ -25,3 +25,8 @@ func getStructureValue(data interface{}) reflect.Value {
 func getStructureElement(data interface{}) reflect.Value {
 	return reflect.ValueOf(data).Elem()
 }
+
+// getStructurePointer gets the pointer of the supplied structure
+func getStructurePointer(data interface{}) uintptr {
+	return reflect.ValueOf(data).Pointer()
+}
