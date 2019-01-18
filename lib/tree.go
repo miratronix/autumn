@@ -22,13 +22,13 @@ func (t *Tree) AddLeaf(value interface{}) *Tree {
 	return t.add(NewLeaf(value))
 }
 
-// AddNamedLead adds a named leaf to the tree
+// AddNamedLeaf adds a named leaf to the tree
 func (t *Tree) AddNamedLeaf(name string, value interface{}) *Tree {
 	t.checkType(value)
 	return t.add(NewNamedLeaf(name, value))
 }
 
-// Resolves loops over the leaves in the tree, setting all dependencies
+// Resolve loops over the leaves in the tree, setting all dependencies
 func (t *Tree) Resolve() {
 	for _, leaf := range t.leaves {
 
