@@ -95,6 +95,8 @@ func (t *Tree) checkUnresolved() {
 
 // add adds a leaf to the tree
 func (t *Tree) add(leaf *Leaf) *Tree {
+	t.checkName(leaf.name)
+
 	ptr := leaf.structurePointer
 
 	if _, ok := t.leaves[ptr]; ok {
@@ -102,7 +104,6 @@ func (t *Tree) add(leaf *Leaf) *Tree {
 		return t
 	}
 
-	t.checkName(leaf.name)
 	t.leaves[ptr] = leaf
 
 	return t
