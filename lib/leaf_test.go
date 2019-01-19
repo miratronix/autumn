@@ -1,8 +1,9 @@
 package lib
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 type namedByPointer struct{}
@@ -50,6 +51,10 @@ func TestNewLeaf(t *testing.T) {
 			})
 		})
 
+		Convey("Sets the leaf alias", func() {
+			So(NewLeaf(&bar{}).aliases, ShouldContainKey, "bar")
+		})
+
 		Convey("Sets the unresolved leaf dependencies", func() {
 			So(NewLeaf(&withDep{}).unresolvedDependencies, ShouldHaveLength, 1)
 		})
@@ -68,6 +73,10 @@ func TestNewNamedLeaf(t *testing.T) {
 			Convey("With a value receiver", func() {
 				So(NewNamedLeaf("test", &namedByValue{}).name, ShouldEqual, "test")
 			})
+		})
+
+		Convey("Sets the leaf alias", func() {
+			So(NewNamedLeaf("test", &bar{}).aliases, ShouldContainKey, "test")
 		})
 
 		Convey("Sets the unresolved leaf dependencies", func() {
@@ -101,5 +110,15 @@ func TestResolveDependencies(t *testing.T) {
 
 		fLeaf.resolveDependencies(NewTree().add(fLeaf).add(bLeaf))
 		So(f.pcCalled, ShouldBeTrue)
+	})
+}
+
+func TestHasAlias(t *testing.T) {
+	Convey("Returns true when alias does contain name", t, func() {
+		So(NewLeaf(&bar{}).HasAlias("bar"), ShouldEqual, true)
+	})
+
+	Convey("Retuns false when alias does not contain name", t, func() {
+		So(NewLeaf(&bar{}).HasAlias("foo"), ShouldEqual, false)
 	})
 }
