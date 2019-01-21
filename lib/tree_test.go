@@ -82,7 +82,7 @@ func TestChop(t *testing.T) {
 		So(leaf.pdValue, ShouldEqual, 1)
 	})
 
-	Convey("Calls aliased leaf PreDestroy once", t, func() {
+	Convey("Calls the aliased leaf's PreDestroy once", t, func() {
 		leaf := &lifecylceCounter{}
 		NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Chop()
 
@@ -138,21 +138,21 @@ func TestAddNamedLeaf(t *testing.T) {
 
 func TestAddSameLeaf(t *testing.T) {
 	Convey("Adds same leaf twice", t, func() {
-		Convey("Panics if adding same leaf with same name via AddLeaf", func() {
+		Convey("Panics if the same leaf is added twice without a specified name", func() {
 			leaf := &noop{}
 			So(func() {
 				NewTree().AddLeaf(leaf).AddLeaf(leaf)
 			}, ShouldPanic)
 		})
 
-		Convey("Panics if adding same leaf with same name via AddNamedLeaf", func() {
+		Convey("Panics if the same leaf is added twice with the same name", func() {
 			leaf := &noop{}
 			So(func() {
 				NewTree().AddNamedLeaf("test", leaf).AddNamedLeaf("test", leaf)
 			}, ShouldPanic)
 		})
 
-		Convey("Adds alias to existing leaf if adding same leaf added with new name via AddLeaf", func() {
+		Convey("Adds an alias to an existing leaf if the same leaf is added with a new name", func() {
 			leaf := &noop{}
 			tree := NewTree().AddNamedLeaf("test", leaf)
 			So(tree.leaves, ShouldHaveLength, 1)
@@ -161,7 +161,7 @@ func TestAddSameLeaf(t *testing.T) {
 			So(tree.leaves, ShouldHaveLength, 1)
 		})
 
-		Convey("Adds alias to existing leaf if adding same leaf added with new name via AddNamedLeaf", func() {
+		Convey("Adds an alias to an existing leaf if it is added twice with different names", func() {
 			leaf := &noop{}
 			tree := NewTree().AddLeaf(leaf)
 			So(tree.leaves, ShouldHaveLength, 1)
@@ -215,7 +215,7 @@ func TestResolve(t *testing.T) {
 			}, ShouldPanic)
 		})
 
-		Convey("Calls aliased leaf PostConstruct once", func() {
+		Convey("Calls the aliased leaf's PostConstruct once", func() {
 			leaf := &lifecylceCounter{}
 			NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Resolve()
 

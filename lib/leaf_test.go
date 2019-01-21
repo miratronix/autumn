@@ -114,11 +114,11 @@ func TestResolveDependencies(t *testing.T) {
 }
 
 func TestHasAlias(t *testing.T) {
-	Convey("Returns true when alias does contain name", t, func() {
-		So(NewLeaf(&bar{}).HasAlias("bar"), ShouldEqual, true)
+	Convey("Returns true when the leaf's alias list contains the name", t, func() {
+		So(NewLeaf(&bar{}).hasAlias("bar"), ShouldEqual, true)
 	})
 
-	Convey("Retuns false when alias does not contain name", t, func() {
-		So(NewLeaf(&bar{}).HasAlias("foo"), ShouldEqual, false)
+	Convey("Returns false when the leaf's alias list does not contain the name", t, func() {
+		So(NewLeaf(&bar{}).hasAlias("foo"), ShouldEqual, false)
 	})
 }

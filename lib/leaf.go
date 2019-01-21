@@ -43,7 +43,7 @@ func NewLeaf(structPtr interface{}) *Leaf {
 	leaf.initializePostConstruct()
 	leaf.initializePreDestroy()
 
-	leaf.AddAlias(leaf.name)
+	leaf.addAlias(leaf.name)
 
 	return leaf
 }
@@ -63,18 +63,18 @@ func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
 	leaf.initializePostConstruct()
 	leaf.initializePreDestroy()
 
-	leaf.AddAlias(leaf.name)
+	leaf.addAlias(leaf.name)
 
 	return leaf
 }
 
-// AddAlias adds passed name to aliases
-func (l *Leaf) AddAlias(name string) {
+// addAlias adds the supplied name to the leaf's alias' list
+func (l *Leaf) addAlias(name string) {
 	l.aliases[name] = struct{}{}
 }
 
-// HasAlias checks if leaf has passed name as alias
-func (l *Leaf) HasAlias(name string) bool {
+// hasAlias checks if the leaf has the supplied name as an alias
+func (l *Leaf) hasAlias(name string) bool {
 	_, ok := l.aliases[name]
 	return ok
 }

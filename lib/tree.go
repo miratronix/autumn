@@ -49,7 +49,7 @@ func (t *Tree) Resolve() {
 // GetLeaf gets a leaf in the tree by name
 func (t *Tree) GetLeaf(name string) *Leaf {
 	for _, leaf := range t.leaves {
-		if leaf.HasAlias(name) {
+		if leaf.hasAlias(name) {
 			return leaf
 		}
 	}
@@ -99,8 +99,9 @@ func (t *Tree) add(leaf *Leaf) *Tree {
 
 	ptr := leaf.structurePointer
 
-	if _, ok := t.leaves[ptr]; ok {
-		t.leaves[ptr].AddAlias(leaf.name)
+	_, ok := t.leaves[ptr]
+	if ok {
+		t.leaves[ptr].addAlias(leaf.name)
 		return t
 	}
 
