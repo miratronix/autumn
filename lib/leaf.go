@@ -16,7 +16,7 @@ type Leaf struct {
 	structureType    reflect.Type
 	structureValue   reflect.Value
 	structureElement reflect.Value
-	structurePointer uintptr
+	structureAddress uintptr
 
 	name          string
 	aliases       map[string]struct{}
@@ -34,7 +34,7 @@ func NewLeaf(structPtr interface{}) *Leaf {
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
-		structurePointer: getStructurePointer(structPtr),
+		structureAddress: getStructureAddress(structPtr),
 		aliases:          make(map[string]struct{}),
 	}
 
@@ -54,7 +54,7 @@ func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
-		structurePointer: getStructurePointer(structPtr),
+		structureAddress: getStructureAddress(structPtr),
 		name:             name,
 		aliases:          make(map[string]struct{}),
 	}

@@ -97,15 +97,15 @@ func (t *Tree) checkUnresolved() {
 func (t *Tree) add(leaf *Leaf) *Tree {
 	t.checkName(leaf.name)
 
-	ptr := leaf.structurePointer
+	address := leaf.structureAddress
 
-	_, ok := t.leaves[ptr]
+	_, ok := t.leaves[address]
 	if ok {
-		t.leaves[ptr].addAlias(leaf.name)
+		t.leaves[address].addAlias(leaf.name)
 		return t
 	}
 
-	t.leaves[ptr] = leaf
+	t.leaves[address] = leaf
 
 	return t
 }
