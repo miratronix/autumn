@@ -1,8 +1,9 @@
 package lib
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 type noop struct{}
@@ -61,11 +62,31 @@ func (c *circularBar) GetLeafName() string {
 	return "circularBar"
 }
 
+type lifecylceCounter struct {
+	pcCount int
+	pdCount int
+}
+
+func (l *lifecylceCounter) PostConstruct() {
+	l.pcCount++
+}
+
+func (l *lifecylceCounter) PreDestroy() {
+	l.pdCount++
+}
+
 func TestChop(t *testing.T) {
 	Convey("Calls PreDestroy in each leaf", t, func() {
 		leaf := &child{}
 		NewTree().AddLeaf(leaf).Chop()
 		So(leaf.pdValue, ShouldEqual, 1)
+	})
+
+	Convey("Calls the aliased leaf's PreDestroy once", t, func() {
+		leaf := &lifecylceCounter{}
+		NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Chop()
+
+		So(leaf.pdCount, ShouldEqual, 1)
 	})
 }
 
@@ -115,6 +136,42 @@ func TestAddNamedLeaf(t *testing.T) {
 	})
 }
 
+func TestAddSameLeaf(t *testing.T) {
+	Convey("Adds same leaf twice", t, func() {
+		Convey("Panics if the same leaf is added twice without a specified name", func() {
+			leaf := &noop{}
+			So(func() {
+				NewTree().AddLeaf(leaf).AddLeaf(leaf)
+			}, ShouldPanic)
+		})
+
+		Convey("Panics if the same leaf is added twice with the same name", func() {
+			leaf := &noop{}
+			So(func() {
+				NewTree().AddNamedLeaf("test", leaf).AddNamedLeaf("test", leaf)
+			}, ShouldPanic)
+		})
+
+		Convey("Adds an alias to an existing leaf if the same leaf is added with a new name", func() {
+			leaf := &noop{}
+			tree := NewTree().AddNamedLeaf("test", leaf)
+			So(tree.leaves, ShouldHaveLength, 1)
+
+			tree.AddLeaf(leaf)
+			So(tree.leaves, ShouldHaveLength, 1)
+		})
+
+		Convey("Adds an alias to an existing leaf if it is added twice with different names", func() {
+			leaf := &noop{}
+			tree := NewTree().AddLeaf(leaf)
+			So(tree.leaves, ShouldHaveLength, 1)
+
+			tree.AddNamedLeaf("test", leaf)
+			So(tree.leaves, ShouldHaveLength, 1)
+		})
+	})
+}
+
 func TestResolve(t *testing.T) {
 	Convey("Resolves dependencies on leaves", t, func() {
 
@@ -156,6 +213,13 @@ func TestResolve(t *testing.T) {
 			So(func() {
 				NewTree().AddLeaf(&brokenDependency{}).Resolve()
 			}, ShouldPanic)
+		})
+
+		Convey("Calls the aliased leaf's PostConstruct once", func() {
+			leaf := &lifecylceCounter{}
+			NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Resolve()
+
+			So(leaf.pcCount, ShouldEqual, 1)
 		})
 	})
 }
