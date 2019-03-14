@@ -89,6 +89,7 @@ tree.Resolve()
 tree.AddNamedLeaf("AnotherFirst", first)
 
 // To kill all the leaves in the tree, call Chop(). This is useful when gracefully shutting down an application, and
-// gives each leaf a chance to clean up after itself.
+// gives each leaf a chance to clean up after itself. Post destruct for each leaf will be called once, in reverse 
+// resolve order
 tree.Chop()
 ```

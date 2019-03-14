@@ -2,17 +2,19 @@ package lib
 
 // Tree defines a set of leaves
 type Tree struct {
-	unresolved  map[string][]string
-	leaves      map[uintptr]*Leaf
-	stopChannel chan struct{}
+	unresolved    map[string][]string
+	leaves        map[uintptr]*Leaf
+	orderedLeaves []*Leaf
+	stopChannel   chan struct{}
 }
 
 // NewTree constructs a new tree
 func NewTree() *Tree {
 	return &Tree{
-		unresolved:  make(map[string][]string),
-		leaves:      make(map[uintptr]*Leaf),
-		stopChannel: nil,
+		unresolved:    make(map[string][]string),
+		leaves:        make(map[uintptr]*Leaf),
+		orderedLeaves: []*Leaf{},
+		stopChannel:   nil,
 	}
 }
 
@@ -30,7 +32,7 @@ func (t *Tree) AddNamedLeaf(name string, value interface{}) *Tree {
 
 // Resolve loops over the leaves in the tree, setting all dependencies
 func (t *Tree) Resolve() {
-	for _, leaf := range t.leaves {
+	for _, leaf := range t.orderedLeaves {
 
 		// Resolve the dependencies for the leaf
 		leaf.resolveDependencies(t)
@@ -56,10 +58,10 @@ func (t *Tree) GetLeaf(name string) *Leaf {
 	return nil
 }
 
-// Chop chops down the tree, calling pre-destroy on all the leaves that have it
+// Chop chops down the tree, calling pre-destroy on all the leaves that have it in reverse ordder
 func (t *Tree) Chop() {
-	for _, leaf := range t.leaves {
-		leaf.callPreDestroy()
+	for i := len(t.orderedLeaves) - 1; i >= 0; i-- {
+		t.orderedLeaves[i].callPreDestroy()
 	}
 }
 
@@ -99,13 +101,15 @@ func (t *Tree) add(leaf *Leaf) *Tree {
 
 	address := leaf.structureAddress
 
+	// If the leaf has been added before, just add a alias
 	_, ok := t.leaves[address]
 	if ok {
 		t.leaves[address].addAlias(leaf.name)
 		return t
 	}
 
+	// First time adding it
 	t.leaves[address] = leaf
-
+	t.orderedLeaves = append(t.orderedLeaves, leaf)
 	return t
 }
