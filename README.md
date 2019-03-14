@@ -82,13 +82,14 @@ tree.AddLeaf(second)
 // You can now resolve the dependencies. Once this operation completes, first.SecondLeaf will point to second. and 
 // second.FirstLeaf will point to first. Because of the order in which these were added, "First constructed" will be 
 // printed first, followed by "Second constructed"
-tree.Resolve()
+tree.Grow()
 
 // You can also set the leaf name while adding it, which overrides the leaf name defined in the structure. This is
 // useful when you want to add multiple copies of the same leaf with different names
 tree.AddNamedLeaf("AnotherFirst", first)
 
 // To kill all the leaves in the tree, call Chop(). This is useful when gracefully shutting down an application, and
-// gives each leaf a chance to clean up after itself.
+// gives each leaf a chance to clean up after itself. Post destruct for each leaf will be called once, in reverse 
+// resolve order
 tree.Chop()
 ```
