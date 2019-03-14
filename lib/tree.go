@@ -30,8 +30,8 @@ func (t *Tree) AddNamedLeaf(name string, value interface{}) *Tree {
 	return t.add(NewNamedLeaf(name, value))
 }
 
-// Resolve loops over the leaves in the tree, setting all dependencies
-func (t *Tree) Resolve() {
+// Grow loops over the leaves in the tree, setting all dependencies
+func (t *Tree) Grow() {
 	for _, leaf := range t.orderedLeaves {
 
 		// Resolve the dependencies for the leaf

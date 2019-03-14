@@ -172,13 +172,13 @@ func TestAddSameLeaf(t *testing.T) {
 	})
 }
 
-func TestResolve(t *testing.T) {
+func TestGrow(t *testing.T) {
 	Convey("Resolves dependencies on leaves", t, func() {
 
 		Convey("Handles self-injection", func() {
 			tree := NewTree()
 			si := &selfInject{}
-			tree.AddLeaf(si).Resolve()
+			tree.AddLeaf(si).Grow()
 			So(tree.unresolved, ShouldHaveLength, 0)
 			So(si.S, ShouldEqual, si)
 		})
@@ -189,8 +189,8 @@ func TestResolve(t *testing.T) {
 			p2 := &parent{}
 			c2 := &child{}
 
-			NewTree().AddLeaf(p1).AddLeaf(c1).Resolve()
-			NewTree().AddLeaf(c2).AddLeaf(p2).Resolve()
+			NewTree().AddLeaf(p1).AddLeaf(c1).Grow()
+			NewTree().AddLeaf(c2).AddLeaf(p2).Grow()
 
 			So(p1.pcValue, ShouldEqual, 1)
 			So(c1.pcValue, ShouldEqual, 1)
@@ -203,7 +203,7 @@ func TestResolve(t *testing.T) {
 			f := circularFoo{}
 			b := circularBar{}
 
-			NewTree().AddLeaf(&f).AddLeaf(&b).Resolve()
+			NewTree().AddLeaf(&f).AddLeaf(&b).Grow()
 
 			So(f.Bar, ShouldEqual, &b)
 			So(b.Foo, ShouldEqual, &f)
@@ -211,13 +211,13 @@ func TestResolve(t *testing.T) {
 
 		Convey("Panics if a dependency can't be found", func() {
 			So(func() {
-				NewTree().AddLeaf(&brokenDependency{}).Resolve()
+				NewTree().AddLeaf(&brokenDependency{}).Grow()
 			}, ShouldPanic)
 		})
 
 		Convey("Calls the aliased leaf's PostConstruct once", func() {
 			leaf := &lifecylceCounter{}
-			NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Resolve()
+			NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Grow()
 
 			So(leaf.pcCount, ShouldEqual, 1)
 		})

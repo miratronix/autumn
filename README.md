@@ -82,7 +82,7 @@ tree.AddLeaf(second)
 // You can now resolve the dependencies. Once this operation completes, first.SecondLeaf will point to second. and 
 // second.FirstLeaf will point to first. Because of the order in which these were added, "First constructed" will be 
 // printed first, followed by "Second constructed"
-tree.Resolve()
+tree.Grow()
 
 // You can also set the leaf name while adding it, which overrides the leaf name defined in the structure. This is
 // useful when you want to add multiple copies of the same leaf with different names
