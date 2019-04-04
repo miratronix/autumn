@@ -1,10 +1,10 @@
-package lib
+package autumn
 
 // Tree defines a set of leaves
 type Tree struct {
 	unresolved    map[string][]string
-	leaves        map[uintptr]*Leaf
-	orderedLeaves []*Leaf
+	leaves        map[uintptr]*leaf
+	orderedLeaves []*leaf
 	stopChannel   chan struct{}
 }
 
@@ -12,8 +12,8 @@ type Tree struct {
 func NewTree() *Tree {
 	return &Tree{
 		unresolved:    make(map[string][]string),
-		leaves:        make(map[uintptr]*Leaf),
-		orderedLeaves: []*Leaf{},
+		leaves:        make(map[uintptr]*leaf),
+		orderedLeaves: []*leaf{},
 		stopChannel:   nil,
 	}
 }
@@ -21,13 +21,13 @@ func NewTree() *Tree {
 // AddLeaf adds a leaf to the tree
 func (t *Tree) AddLeaf(value interface{}) *Tree {
 	t.checkType(value)
-	return t.add(NewLeaf(value))
+	return t.add(newLeaf(value))
 }
 
 // AddNamedLeaf adds a named leaf to the tree
 func (t *Tree) AddNamedLeaf(name string, value interface{}) *Tree {
 	t.checkType(value)
-	return t.add(NewNamedLeaf(name, value))
+	return t.add(newNamedLeaf(name, value))
 }
 
 // Grow loops over the leaves in the tree, setting all dependencies
@@ -49,7 +49,7 @@ func (t *Tree) Grow() {
 }
 
 // GetLeaf gets a leaf in the tree by name
-func (t *Tree) GetLeaf(name string) *Leaf {
+func (t *Tree) GetLeaf(name string) *leaf {
 	for _, leaf := range t.leaves {
 		if leaf.hasAlias(name) {
 			return leaf
@@ -96,7 +96,7 @@ func (t *Tree) checkUnresolved() {
 }
 
 // add adds a leaf to the tree
-func (t *Tree) add(leaf *Leaf) *Tree {
+func (t *Tree) add(leaf *leaf) *Tree {
 	t.checkName(leaf.name)
 
 	address := leaf.structureAddress
