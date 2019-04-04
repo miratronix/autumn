@@ -1,4 +1,4 @@
-package lib
+package autumn
 
 import (
 	"testing"
@@ -43,20 +43,20 @@ func TestNewLeaf(t *testing.T) {
 		Convey("Sets the leaf name", func() {
 
 			Convey("With a pointer receiver", func() {
-				So(NewLeaf(&namedByPointer{}).name, ShouldEqual, "namedByPointer")
+				So(newLeaf(&namedByPointer{}).name, ShouldEqual, "namedByPointer")
 			})
 
 			Convey("With a value receiver", func() {
-				So(NewLeaf(&namedByValue{}).name, ShouldEqual, "namedByValue")
+				So(newLeaf(&namedByValue{}).name, ShouldEqual, "namedByValue")
 			})
 		})
 
 		Convey("Sets the leaf alias", func() {
-			So(NewLeaf(&bar{}).aliases, ShouldContainKey, "bar")
+			So(newLeaf(&bar{}).aliases, ShouldContainKey, "bar")
 		})
 
 		Convey("Sets the unresolved leaf dependencies", func() {
-			So(NewLeaf(&withDep{}).unresolvedDependencies, ShouldHaveLength, 1)
+			So(newLeaf(&withDep{}).unresolvedDependencies, ShouldHaveLength, 1)
 		})
 	})
 }
@@ -67,20 +67,20 @@ func TestNewNamedLeaf(t *testing.T) {
 		Convey("Sets the leaf name", func() {
 
 			Convey("With a pointer receiver", func() {
-				So(NewNamedLeaf("test", &namedByPointer{}).name, ShouldEqual, "test")
+				So(newNamedLeaf("test", &namedByPointer{}).name, ShouldEqual, "test")
 			})
 
 			Convey("With a value receiver", func() {
-				So(NewNamedLeaf("test", &namedByValue{}).name, ShouldEqual, "test")
+				So(newNamedLeaf("test", &namedByValue{}).name, ShouldEqual, "test")
 			})
 		})
 
 		Convey("Sets the leaf alias", func() {
-			So(NewNamedLeaf("test", &bar{}).aliases, ShouldContainKey, "test")
+			So(newNamedLeaf("test", &bar{}).aliases, ShouldContainKey, "test")
 		})
 
 		Convey("Sets the unresolved leaf dependencies", func() {
-			So(NewNamedLeaf("test", &withDep{}).unresolvedDependencies, ShouldHaveLength, 1)
+			So(newNamedLeaf("test", &withDep{}).unresolvedDependencies, ShouldHaveLength, 1)
 		})
 	})
 }
@@ -91,8 +91,8 @@ func TestResolveDependencies(t *testing.T) {
 		f := &foo{}
 		b := &bar{}
 
-		fLeaf := NewLeaf(f)
-		bLeaf := NewLeaf(b)
+		fLeaf := newLeaf(f)
+		bLeaf := newLeaf(b)
 
 		fLeaf.resolveDependencies(NewTree().add(fLeaf).add(bLeaf))
 		So(f.Bar, ShouldEqual, b)
@@ -105,8 +105,8 @@ func TestResolveDependencies(t *testing.T) {
 		f := &foo{}
 		b := &bar{}
 
-		fLeaf := NewLeaf(f)
-		bLeaf := NewLeaf(b)
+		fLeaf := newLeaf(f)
+		bLeaf := newLeaf(b)
 
 		fLeaf.resolveDependencies(NewTree().add(fLeaf).add(bLeaf))
 		So(f.pcCalled, ShouldBeTrue)
@@ -115,10 +115,10 @@ func TestResolveDependencies(t *testing.T) {
 
 func TestHasAlias(t *testing.T) {
 	Convey("Returns true when the leaf's alias list contains the name", t, func() {
-		So(NewLeaf(&bar{}).hasAlias("bar"), ShouldEqual, true)
+		So(newLeaf(&bar{}).hasAlias("bar"), ShouldEqual, true)
 	})
 
 	Convey("Returns false when the leaf's alias list does not contain the name", t, func() {
-		So(NewLeaf(&bar{}).hasAlias("foo"), ShouldEqual, false)
+		So(newLeaf(&bar{}).hasAlias("foo"), ShouldEqual, false)
 	})
 }

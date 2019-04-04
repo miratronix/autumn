@@ -1,4 +1,4 @@
-package lib
+package autumn
 
 import (
 	. "github.com/smartystreets/goconvey/convey"

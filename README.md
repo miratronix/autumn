@@ -1,5 +1,4 @@
 # Autumn
-
 Autumn is a basic, spring-inspired dependency injection framework for Go. It's a work in progress, but some baseline functionality is there:
 
 * Structure tag name-based wiring
@@ -20,7 +19,7 @@ Naturally, there's lots to do:
 
 Before jumping into usage, let's define some terms:
 
-* `Leaf` - A leaf is a singleton structure pointer. You can think of it as a Spring `Bean`. It has 2 properties:
+* `Leaf` - A leaf is a singleton structure pointer. You can think of it as a Spring `Bean`. It has 3 properties:
     * a name, used to wire it into other leaves. This can be set with `GetLeafName`, or by assigning a name when adding the leaf to a tree.
     * an optional `PostConstruct` function, which is called when dependencies have been resolved.
     * an optional `PreDestroy` function, which is called when the tree is "chopped" (stopped).

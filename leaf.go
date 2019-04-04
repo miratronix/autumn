@@ -1,4 +1,4 @@
-package lib
+package autumn
 
 import (
 	"reflect"
@@ -11,8 +11,8 @@ const (
 	preDestroyMethod    = "PreDestroy"
 )
 
-// Leaf describes a single injected class
-type Leaf struct {
+// leaf describes a single injected class
+type leaf struct {
 	structureType    reflect.Type
 	structureValue   reflect.Value
 	structureElement reflect.Value
@@ -28,9 +28,9 @@ type Leaf struct {
 	resolvedDependencies   map[string]reflect.Value
 }
 
-// NewLeaf constructs a new leaf, using the structure name as the name
-func NewLeaf(structPtr interface{}) *Leaf {
-	leaf := &Leaf{
+// newLeaf constructs a new leaf, using the structure name as the name
+func newLeaf(structPtr interface{}) *leaf {
+	leaf := &leaf{
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
@@ -48,9 +48,9 @@ func NewLeaf(structPtr interface{}) *Leaf {
 	return leaf
 }
 
-// NewNamedLeaf constructs a new leaf with the specified name
-func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
-	leaf := &Leaf{
+// newNamedLeaf constructs a new leaf with the specified name
+func newNamedLeaf(name string, structPtr interface{}) *leaf {
+	leaf := &leaf{
 		structureType:    getStructureType(structPtr),
 		structureValue:   getStructureValue(structPtr),
 		structureElement: getStructureElement(structPtr),
@@ -69,18 +69,18 @@ func NewNamedLeaf(name string, structPtr interface{}) *Leaf {
 }
 
 // addAlias adds the supplied name to the leaf's alias' list
-func (l *Leaf) addAlias(name string) {
+func (l *leaf) addAlias(name string) {
 	l.aliases[name] = struct{}{}
 }
 
 // hasAlias checks if the leaf has the supplied name as an alias
-func (l *Leaf) hasAlias(name string) bool {
+func (l *leaf) hasAlias(name string) bool {
 	_, ok := l.aliases[name]
 	return ok
 }
 
 // initializeName initializes the name for the leaf
-func (l *Leaf) initializeName() {
+func (l *leaf) initializeName() {
 
 	method := l.structureValue.MethodByName(getNameMethod)
 	if !method.IsValid() {
@@ -100,7 +100,7 @@ func (l *Leaf) initializeName() {
 }
 
 // initializeDependencies read in structure tags to find dependencies
-func (l *Leaf) initializeDependencies() {
+func (l *leaf) initializeDependencies() {
 	l.unresolvedDependencies = map[string]reflect.Value{}
 	l.resolvedDependencies = map[string]reflect.Value{}
 
@@ -114,7 +114,7 @@ func (l *Leaf) initializeDependencies() {
 }
 
 // initializePostConstruct initializes the post construct function for the leaf, panicking if it's invalid
-func (l *Leaf) initializePostConstruct() {
+func (l *leaf) initializePostConstruct() {
 	l.postConstruct = l.structureValue.MethodByName(postConstructMethod)
 	if !l.postConstruct.IsValid() {
 		return
@@ -128,7 +128,7 @@ func (l *Leaf) initializePostConstruct() {
 }
 
 // initializePreDestroy initializes the pre destroy function for the leaf, panicking if it's invalid
-func (l *Leaf) initializePreDestroy() {
+func (l *leaf) initializePreDestroy() {
 	l.preDestroy = l.structureValue.MethodByName(preDestroyMethod)
 	if !l.preDestroy.IsValid() {
 		return
@@ -142,7 +142,7 @@ func (l *Leaf) initializePreDestroy() {
 }
 
 // resolveDependencies resolves dependencies for the leaf using the supplied tree
-func (l *Leaf) resolveDependencies(tree *Tree) {
+func (l *leaf) resolveDependencies(tree *Tree) {
 	for name := range l.unresolvedDependencies {
 		dep := tree.GetLeaf(name)
 		if dep != nil {
@@ -157,7 +157,7 @@ func (l *Leaf) resolveDependencies(tree *Tree) {
 }
 
 // setDependency sets a dependency in the leaf
-func (l *Leaf) setDependency(tree *Tree, name string, leaf *Leaf) {
+func (l *leaf) setDependency(tree *Tree, name string, leaf *leaf) {
 	if !l.unresolvedDependencies[name].IsValid() {
 		panic("Can't set dependency " + name + "in leaf" + l.name)
 	}
@@ -169,12 +169,12 @@ func (l *Leaf) setDependency(tree *Tree, name string, leaf *Leaf) {
 }
 
 // dependenciesResolved determines if dependencies have been resolved
-func (l *Leaf) dependenciesResolved() bool {
+func (l *leaf) dependenciesResolved() bool {
 	return len(l.unresolvedDependencies) == 0
 }
 
 // callPostConstruct calls the leaf's PostConstruct method if it has one
-func (l *Leaf) callPostConstruct() {
+func (l *leaf) callPostConstruct() {
 	if !l.postConstruct.IsValid() {
 		return
 	}
@@ -182,7 +182,7 @@ func (l *Leaf) callPostConstruct() {
 }
 
 // callPreDestroy calls the leaf's PreDestroy method if it has one
-func (l *Leaf) callPreDestroy() {
+func (l *leaf) callPreDestroy() {
 	if !l.preDestroy.IsValid() {
 		return
 	}
