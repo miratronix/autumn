@@ -32,6 +32,8 @@ func (t *Tree) AddNamedLeaf(name string, value interface{}) *Tree {
 
 // Grow loops over the leaves in the tree, setting all dependencies
 func (t *Tree) Grow() {
+
+	// Loop over the leaves and resolve their dependencies
 	for _, leaf := range t.orderedLeaves {
 
 		// Resolve the dependencies for the leaf
@@ -45,7 +47,14 @@ func (t *Tree) Grow() {
 			}
 		}
 	}
+
+	// Make sure all dependencies are resolved
 	t.checkUnresolved()
+
+	// Loop over the leaves again and call PostConstruct
+	for _, leaf := range t.orderedLeaves {
+		leaf.callPostConstruct()
+	}
 }
 
 // GetLeaf gets a leaf in the tree by name

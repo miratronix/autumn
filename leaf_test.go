@@ -99,18 +99,6 @@ func TestResolveDependencies(t *testing.T) {
 		So(fLeaf.resolvedDependencies, ShouldHaveLength, 1)
 		So(fLeaf.unresolvedDependencies, ShouldHaveLength, 0)
 	})
-
-	Convey("Calls PostConstruct when complete", t, func() {
-
-		f := &foo{}
-		b := &bar{}
-
-		fLeaf := newLeaf(f)
-		bLeaf := newLeaf(b)
-
-		fLeaf.resolveDependencies(NewTree().add(fLeaf).add(bLeaf))
-		So(f.pcCalled, ShouldBeTrue)
-	})
 }
 
 func TestHasAlias(t *testing.T) {
