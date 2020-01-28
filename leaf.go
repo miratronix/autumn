@@ -149,11 +149,6 @@ func (l *leaf) resolveDependencies(tree *Tree) {
 			l.setDependency(tree, name, dep)
 		}
 	}
-
-	// All resolved
-	if l.dependenciesResolved() {
-		l.callPostConstruct()
-	}
 }
 
 // setDependency sets a dependency in the leaf
