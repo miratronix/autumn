@@ -62,17 +62,27 @@ func (c *circularBar) GetLeafName() string {
 	return "circularBar"
 }
 
-type lifecylceCounter struct {
+type lifecycleCounter struct {
 	pcCount int
 	pdCount int
 }
 
-func (l *lifecylceCounter) PostConstruct() {
+func (l *lifecycleCounter) PostConstruct() {
 	l.pcCount++
 }
 
-func (l *lifecylceCounter) PreDestroy() {
+func (l *lifecycleCounter) PreDestroy() {
 	l.pdCount++
+}
+
+type aliasSelfInject struct {
+	Self    *aliasSelfInject `autumn:"self"`
+	This    *aliasSelfInject `autumn:"this"`
+	pcCount int
+}
+
+func (a *aliasSelfInject) PostConstruct() {
+	a.pcCount++
 }
 
 func TestChop(t *testing.T) {
@@ -83,8 +93,8 @@ func TestChop(t *testing.T) {
 	})
 
 	Convey("Calls the aliased leaf's PreDestroy once", t, func() {
-		leaf := &lifecylceCounter{}
-		NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Chop()
+		leaf := &lifecycleCounter{}
+		NewTree().AddNamedLeaf("a", leaf).AddAlias("a", "b").Chop()
 
 		So(leaf.pdCount, ShouldEqual, 1)
 	})
@@ -136,6 +146,36 @@ func TestAddNamedLeaf(t *testing.T) {
 	})
 }
 
+func TestAddAlias(t *testing.T) {
+	Convey("Adds a leaf alias", t, func() {
+
+		Convey("Panics if the specified leaf doesn't exist", func() {
+			So(func() {
+				NewTree().AddAlias("a", "b")
+			}, ShouldPanic)
+		})
+
+		Convey("Panics if no aliases are supplied", func() {
+			So(func() {
+				NewTree().AddNamedLeaf("a", &noop{}).AddAlias("a")
+			}, ShouldPanic)
+		})
+
+		Convey("Panics if the alias is already taken", func() {
+			So(func() {
+				NewTree().AddNamedLeaf("a", &noop{}).AddNamedLeaf("b", &noop{}).AddAlias("a", "b")
+			}, ShouldPanic)
+		})
+
+		Convey("Adds the alias", func() {
+			tree := NewTree().AddNamedLeaf("a", &noop{}).AddAlias("a", "b")
+			So(tree.addedLeaves, ShouldHaveLength, 1)
+			So(tree.leaves, ShouldHaveLength, 2)
+			So(tree.leaves["a"], ShouldEqual, tree.leaves["b"])
+		})
+	})
+}
+
 func TestAddSameLeaf(t *testing.T) {
 	Convey("Adds same leaf twice", t, func() {
 		Convey("Panics if the same leaf is added twice without a specified name", func() {
@@ -151,24 +191,6 @@ func TestAddSameLeaf(t *testing.T) {
 				NewTree().AddNamedLeaf("test", leaf).AddNamedLeaf("test", leaf)
 			}, ShouldPanic)
 		})
-
-		Convey("Adds an alias to an existing leaf if the same leaf is added with a new name", func() {
-			leaf := &noop{}
-			tree := NewTree().AddNamedLeaf("test", leaf)
-			So(tree.leaves, ShouldHaveLength, 1)
-
-			tree.AddLeaf(leaf)
-			So(tree.leaves, ShouldHaveLength, 1)
-		})
-
-		Convey("Adds an alias to an existing leaf if it is added twice with different names", func() {
-			leaf := &noop{}
-			tree := NewTree().AddLeaf(leaf)
-			So(tree.leaves, ShouldHaveLength, 1)
-
-			tree.AddNamedLeaf("test", leaf)
-			So(tree.leaves, ShouldHaveLength, 1)
-		})
 	})
 }
 
@@ -179,7 +201,6 @@ func TestGrow(t *testing.T) {
 			tree := NewTree()
 			si := &selfInject{}
 			tree.AddLeaf(si).Grow()
-			So(tree.unresolved, ShouldHaveLength, 0)
 			So(si.S, ShouldEqual, si)
 		})
 
@@ -215,11 +236,20 @@ func TestGrow(t *testing.T) {
 			}, ShouldPanic)
 		})
 
-		Convey("Calls the aliased leaf's PostConstruct once", func() {
-			leaf := &lifecylceCounter{}
-			NewTree().AddNamedLeaf("a", leaf).AddNamedLeaf("b", leaf).Grow()
+		Convey("Calls an aliased leaf's PostConstruct once", func() {
+			leaf := &lifecycleCounter{}
+			NewTree().AddNamedLeaf("a", leaf).AddAlias("a", "b").Grow()
 
 			So(leaf.pcCount, ShouldEqual, 1)
+		})
+
+		Convey("Resolves aliased leafs", func() {
+			leaf := &aliasSelfInject{}
+			NewTree().AddNamedLeaf("selfInject", leaf).AddAlias("selfInject", "self", "this").Grow()
+
+			So(leaf.pcCount, ShouldEqual, 1)
+			So(leaf.Self, ShouldEqual, leaf)
+			So(leaf.This, ShouldEqual, leaf)
 		})
 	})
 }
