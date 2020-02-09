@@ -117,7 +117,7 @@ func (t *Tree) GetLeaf(name string) *leaf {
 // Chop chops down the tree, calling pre-destroy on all the leaves that have it in reverse order
 func (t *Tree) Chop() *Tree {
 	for i := len(t.addedLeaves) - 1; i >= 0; i-- {
-		t.leaves[t.addedLeaves[i]].callPreDestroy()
+		t.GetLeaf(t.addedLeaves[i]).callPreDestroy()
 	}
 	return t
 }
