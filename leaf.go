@@ -4,23 +4,13 @@ import (
 	"reflect"
 )
 
-const (
-	tagName             = "autumn"
-	getNameMethod       = "GetLeafName"
-	postConstructMethod = "PostConstruct"
-	preDestroyMethod    = "PreDestroy"
-)
-
 // leaf describes a single injected class
 type leaf struct {
 	structureType    reflect.Type
 	structureValue   reflect.Value
 	structureElement reflect.Value
-	structureAddress uintptr
 
 	name          string
-	aliases       map[string]struct{}
-	value         interface{}
 	postConstruct reflect.Value
 	preDestroy    reflect.Value
 
@@ -29,58 +19,39 @@ type leaf struct {
 }
 
 // newLeaf constructs a new leaf, using the structure name as the name
-func newLeaf(structPtr interface{}) *leaf {
+func newLeaf(config *config, structurePointer interface{}) *leaf {
 	leaf := &leaf{
-		structureType:    getStructureType(structPtr),
-		structureValue:   getStructureValue(structPtr),
-		structureElement: getStructureElement(structPtr),
-		structureAddress: getStructureAddress(structPtr),
-		aliases:          make(map[string]struct{}),
+		structureType:    getStructureType(structurePointer),
+		structureValue:   getStructureValue(structurePointer),
+		structureElement: getStructureElement(structurePointer),
 	}
 
-	leaf.initializeName()
-	leaf.initializeDependencies()
-	leaf.initializePostConstruct()
-	leaf.initializePreDestroy()
-
-	leaf.addAlias(leaf.name)
+	leaf.initializeName(config.leafNameMethod)
+	leaf.initializeDependencies(config.tagName)
+	leaf.initializePostConstruct(config.postConstructMethod)
+	leaf.initializePreDestroy(config.preDestroyMethod)
 
 	return leaf
 }
 
 // newNamedLeaf constructs a new leaf with the specified name
-func newNamedLeaf(name string, structPtr interface{}) *leaf {
+func newNamedLeaf(config *config, name string, structurePointer interface{}) *leaf {
 	leaf := &leaf{
-		structureType:    getStructureType(structPtr),
-		structureValue:   getStructureValue(structPtr),
-		structureElement: getStructureElement(structPtr),
-		structureAddress: getStructureAddress(structPtr),
+		structureType:    getStructureType(structurePointer),
+		structureValue:   getStructureValue(structurePointer),
+		structureElement: getStructureElement(structurePointer),
 		name:             name,
-		aliases:          make(map[string]struct{}),
 	}
 
-	leaf.initializeDependencies()
-	leaf.initializePostConstruct()
-	leaf.initializePreDestroy()
-
-	leaf.addAlias(leaf.name)
+	leaf.initializeDependencies(config.tagName)
+	leaf.initializePostConstruct(config.postConstructMethod)
+	leaf.initializePreDestroy(config.preDestroyMethod)
 
 	return leaf
 }
 
-// addAlias adds the supplied name to the leaf's alias' list
-func (l *leaf) addAlias(name string) {
-	l.aliases[name] = struct{}{}
-}
-
-// hasAlias checks if the leaf has the supplied name as an alias
-func (l *leaf) hasAlias(name string) bool {
-	_, ok := l.aliases[name]
-	return ok
-}
-
 // initializeName initializes the name for the leaf
-func (l *leaf) initializeName() {
+func (l *leaf) initializeName(getNameMethod string) {
 
 	method := l.structureValue.MethodByName(getNameMethod)
 	if !method.IsValid() {
@@ -99,8 +70,8 @@ func (l *leaf) initializeName() {
 	l.name = method.Call([]reflect.Value{})[0].String()
 }
 
-// initializeDependencies read in structure tags to find dependencies
-func (l *leaf) initializeDependencies() {
+// initializeDependencies reads in structure tags to find dependencies
+func (l *leaf) initializeDependencies(tagName string) {
 	l.unresolvedDependencies = map[string]reflect.Value{}
 	l.resolvedDependencies = map[string]reflect.Value{}
 
@@ -114,7 +85,7 @@ func (l *leaf) initializeDependencies() {
 }
 
 // initializePostConstruct initializes the post construct function for the leaf, panicking if it's invalid
-func (l *leaf) initializePostConstruct() {
+func (l *leaf) initializePostConstruct(postConstructMethod string) {
 	l.postConstruct = l.structureValue.MethodByName(postConstructMethod)
 	if !l.postConstruct.IsValid() {
 		return
@@ -128,7 +99,7 @@ func (l *leaf) initializePostConstruct() {
 }
 
 // initializePreDestroy initializes the pre destroy function for the leaf, panicking if it's invalid
-func (l *leaf) initializePreDestroy() {
+func (l *leaf) initializePreDestroy(preDestroyMethod string) {
 	l.preDestroy = l.structureValue.MethodByName(preDestroyMethod)
 	if !l.preDestroy.IsValid() {
 		return
