@@ -126,7 +126,7 @@ tree.AddNamedLeaf("second", second)
 tree.AddAlias("first", "someOtherName")
 ```
 
-The dependencies will be correctly resolved when the tree is grown, and the `FistLeaf.PostConstruct()` will only be called
+The dependencies will be correctly resolved when the tree is grown, and the `FirstLeaf.PostConstruct()` will only be called
 once (if present).
 
 ### Configuration
