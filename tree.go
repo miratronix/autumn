@@ -43,7 +43,7 @@ func (t *Tree) AddAlias(name string, alias ...string) *Tree {
 		panic("Leaf " + name + " does not exist")
 	}
 
-	// Make sure some alternate names were supplied
+	// Make sure some aliases were supplied
 	if len(alias) == 0 {
 		panic("Please supply one or more aliases")
 	}
