@@ -243,7 +243,7 @@ func TestGrow(t *testing.T) {
 			So(leaf.pcCount, ShouldEqual, 1)
 		})
 
-		Convey("Resolves aliased leafs", func() {
+		Convey("Resolves aliased leaves", func() {
 			leaf := &aliasSelfInject{}
 			NewTree().AddNamedLeaf("selfInject", leaf).AddAlias("selfInject", "self", "this").Grow()
 
